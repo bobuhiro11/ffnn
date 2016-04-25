@@ -185,10 +185,11 @@ class MNIST:
 
     # 添字ixのデータをクラス分類
     # ix: テストデータ中の添字
-    def predict_one(self, ix):
+    def predict_one(self):
         # 多クラス分類を実行
+        ix = np.random.randint(self.X_test.shape[0])
         inputs = np.array([self.X_test[ix]]).T
-        self.dl.propagate(inputs)
+        t = self.dl.propagate(inputs)
 
         # 分類器の結果を出力
         print("answer:")
@@ -196,7 +197,9 @@ class MNIST:
             print(str(i) + ": " + str(int(t[i][0]*100)) + "%")
 
         # 画像を出力
-        self.show_image(self.X_test[ix])
+        img = 256.0 * self.X_test[ix]
+        plt.imshow(img.reshape(28,28))
+        plt.show()
 
     # 全てのテストデータをテストし，精度・再現率・F値を出力
     def predict_all(self):
@@ -216,3 +219,12 @@ a.learn(2000)
 
 print("start testing")
 a.predict_all()
+
+print("start random testing")
+while True:
+    line = sys.stdin.readline()
+    if line:
+        a.predict_one()
+    else:
+        break
+
