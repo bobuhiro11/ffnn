@@ -1,4 +1,5 @@
 import sys
+import operator
 import math as math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -185,21 +186,30 @@ class MNIST:
 
     # 添字ixのデータをクラス分類
     # ix: テストデータ中の添字
-    def predict_one(self):
-        # 多クラス分類を実行
-        ix = np.random.randint(self.X_test.shape[0])
+    # 返値: (回答, その確率)
+    def predict_one(self, ix):
         inputs = np.array([self.X_test[ix]]).T
         t = self.dl.propagate(inputs)
+        return max(enumerate(t.T[0]), key=operator.itemgetter(1))
 
-        # 分類器の結果を出力
-        print("answer:")
-        for i in range(10):
-            print(str(i) + ": " + str(int(t[i][0]*100)) + "%")
+    # 幾つかのテストデータをテストして，出力
+    def predict_some(self):
+        # サイズ
+        row = 5
+        col = 8
 
-        # 画像を出力
-        img = 256.0 * self.X_test[ix]
-        plt.imshow(img.reshape(28,28))
+        fig = plt.figure(figsize=(12, 9))
+        for i in range(1,row*col+1):
+            ix = np.random.randint(self.X_test.shape[0])
+            img = 256.0 * self.X_test[ix]
+            img = img.reshape(28,28)
+            a = fig.add_subplot(row,col,i)
+            a.axis('off')
+            plt.imshow(img,cmap='Greys_r')
+            res = self.predict_one(ix)
+            a.set_title(str(res[0]) + " [" + str(int(res[1]*100)) + "%]")
         plt.show()
+
 
     # 全てのテストデータをテストし，精度・再現率・F値を出力
     def predict_all(self):
@@ -216,15 +226,6 @@ a = MNIST()
 
 print("start learning")
 a.learn(2000)
-
 print("start testing")
 a.predict_all()
-
-print("start random testing")
-while True:
-    line = sys.stdin.readline()
-    if line:
-        a.predict_one()
-    else:
-        break
-
+a.predict_some()
